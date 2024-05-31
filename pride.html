@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pride Month Celebration for Michał</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4, #fad0c4);
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        h1, h2, p, ul {
+            color: #ffffff;
+            text-shadow: 2px 2px #ff69b4;
+        }
+        h1 {
+            font-size: 3em;
+            font-weight: bold;
+        }
+        h2 {
+            font-size: 2.5em;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        .rainbow-flag {
+            position: absolute;
+            width: 50px;
+            height: 30px;
+            background: linear-gradient(to bottom, red, orange, yellow, green, blue, purple);
+            border-radius: 5px;
+            animation: pop-up 1s ease-out;
+        }
+        @keyframes pop-up {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🌈💖 Happy Pride Month, Michał! 💖🌈</h1>
+    <p>Hey Michał! 🌟 Welcome to your fabulously special Pride Month page! Let's celebrate love, acceptance, and the fabulous YOU! 🏳️‍🌈✨</p>
+
+    <h2>💃🎨 Colorful Celebration! 🎨💃</h2>
+    <p>Let's add some sparkle and color to our lives! 🌈💖💛💚💙💜</p>
+
+    <h2>🎶 Fabulous Pride Playlist! 🎶</h2>
+    <p>Let's dance to the rhythm of pride! 🎧💃🕺</p>
+    <ul>
+        <li>"Born This Way" by Lady Gaga 🎤</li>
+        <li>"I Will Survive" by Gloria Gaynor 🎵</li>
+        <li>"True Colors" by Cyndi Lauper 🌈</li>
+        <li>"Dancing Queen" by ABBA 👑</li>
+    </ul>
+
+    <h2>📸 Share Your Pride! 📸</h2>
+    <p>Post your most colorful and glamorous Pride outfits and celebrations! Don't forget to tag #PrideWithMichał 🌈📸</p>
+
+    <button onclick="showRainbowFlags()" style="font-size: 1.5em; padding: 10px 20px; background-color: #ff69b4; border: none; border-radius: 10px; color: white; cursor: pointer;">🌈 Show the Rainbow Flags! 🌈</button>
+
+    <canvas class="confetti"></canvas>
+
+    <script>
+        // Confetti Animation
+        (function() {
+            var confetti = {
+                maxCount: 150,
+                speed: 2,
+                frameInterval: 15,
+                alpha: 1.0,
+                gradient: false,
+                start: null,
+                stop: null,
+                toggle: null,
+                pause: null,
+                resume: null,
+                togglePause: null,
+                remove: null,
+                isPaused: null,
+                isRunning: null
+            };
+
+            (function() {
+                confetti.start = startConfetti;
+                confetti.stop = stopConfetti;
+                confetti.toggle = toggleConfetti;
+                confetti.pause = pauseConfetti;
+                confetti.resume = resumeConfetti;
+                confetti.togglePause = toggleConfettiPause;
+                confetti.isPaused = isConfettiPaused;
+                confetti.isRunning = isConfettiRunning;
+                var supportsAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame;
+                var colors = ["rgba(30,144,255,", "rgba(107,142,35,", "rgba(255,215,0,", "rgba(255,192,203,", "rgba(106,90,205,", "rgba(173,216,230,", "rgba(238,130,238,", "rgba(152,251,152,", "rgba(70,130,180,", "rgba(244,164,96,", "rgba(210,105,30,", "rgba(220,20,60,"];
+                var streamingConfetti = false;
+                var animationTimer = null;
+                var pause = false;
+                var lastFrameTime = Date.now();
+                var particles = [];
+                var waveAngle = 0;
+                var context = null;
+
+                function resetParticle(particle, width, height) {
+                    particle.color = colors[(Math.random() * colors.length) | 0] + (confetti.alpha + ")");
+                    particle.color2 = colors[(Math.random() * colors.length) | 0] + (confetti.alpha + ")");
+                    particle.x = Math.random() * width;
+                    particle.y = Math.random() * height - height;
+                    particle.diameter = Math.random() * 10 + 5;
+                    particle.tilt = Math.random() * 10 - 10;
+                    particle.tiltAngleIncrement = Math.random() * 0.07 + 0.05;
+                    particle.tiltAngle = Math.random() * Math.PI;
+                    return particle;
+                }
+
+                function startConfetti(timeout, min, max) {
+                    var width = window.innerWidth;
+                    var height = window.innerHeight;
+                    window.requestAnimationFrame = (function() {
+                        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {
+                            return window.setTimeout(callback, confetti.frameInterval);
+                        };
+                    })();
+                    var canvas = document.getElementsByClassName("confetti")[0];
+                    context = canvas.getContext("2d");
+                    while (canvas.width < width) canvas.width += width;
+                    while (canvas.height < height) canvas.height += height;
+                    while (particles.length < confetti.maxCount) particles.push(resetParticle({}, width, height));
+                    streamingConfetti = true;
+                    pause = false;
+                    runAnimation();
+                    if (timeout) window.setTimeout(stopConfetti, timeout);
+                }
+
+                function stopConfetti() {
+                    streamingConfetti = false;
+                }
+
+                function removeConfetti() {
+                    stop();
+                    pause = false;
+                    particles = [];
+                }
+
+                function toggleConfetti() {
+                    if (streamingConfetti) stopConfetti();
+                    else startConfetti();
+                }
+
+                function isConfettiPaused() {
+                    return pause;
+                }
+
+                function pauseConfetti() {
+                    pause = true;
+                }
+
+                function resumeConfetti() {
+                    pause = false;
+                    runAnimation();
+                }
+
+                function toggleConfettiPause() {
+                    if (pause) resumeConfetti();
+                    else pauseConfetti();
+                }
+
+                function isConfettiRunning() {
+                    return streamingConfetti;
+                }
+
+                function drawParticles() {
+                    var width = window.innerWidth;
+                    var height = window.innerHeight;
+                    context.clearRect(0, 0, width, height);
+                    context.beginPath();
+                    for (var i = 0; i < particles.length; i++) {
+                        var particle = particles[i];
+                        context.moveTo(particle.x + particle.diameter / 2, particle.y);
+                        context.lineTo(particle.x, particle.y + particle.tilt + particle.diameter / 2);
+                    }
+                    context.stroke();
+                }
+
+                function updateParticles() {
+                    var width = window.innerWidth;
+                    var height = window.innerHeight;
+                    var particle;
+                    waveAngle += 0.01;
+                    for (var i = 0; i < particles.length; i++) {
+                        particle = particles[i];
+                        if (!streamingConfetti && particle.y < -15) particle.y = height + 100;
+                        else {
+                            particle.tiltAngle += particle.tiltAngleIncrement;
+                            particle.x += Math.sin(waveAngle);
+                            particle.y += (Math.cos(waveAngle) + particle.diameter + confetti.speed) * 0.5;
+                            particle.tilt = Math.sin(particle.tiltAngle) * 15;
+                        }
+                        if (particle.y > height || particle.x > width || particle.x < -10) {
+                            if (streamingConfetti && particles.length <= confetti.maxCount) resetParticle(particle, width, height);
+                            else {
+                                particles.splice(i, 1);
+                                i--;
+                            }
+                        }
+                    }
+                }
+
+                function runAnimation() {
+                    if (pause) return;
+                    var now = Date.now();
+                    var delta = now - lastFrameTime;
+                    if (delta > confetti.frameInterval) {
+                        context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                        updateParticles();
+                        drawParticles();
+                        lastFrameTime = now - (delta % confetti.frameInterval);
+                    }
+                    if (streamingConfetti) requestAnimationFrame(runAnimation);
+                }
+
+                window.startConfetti = startConfetti;
+                window.stopConfetti = stopConfetti;
+                window.toggleConfetti = toggleConfetti;
+                window.pauseConfetti = pauseConfetti;
+                window.resumeConfetti = resumeConfetti;
+                window.toggleConfettiPause = toggleConfettiPause;
+                window.removeConfetti = removeConfetti;
+                window.isConfettiPaused = isConfettiPaused;
+                window.isConfettiRunning = isConfettiRunning;
+            })();
+        })();
+
+        // Start confetti on page load
+        startConfetti();
+
+        // Show rainbow flags
+        function showRainbowFlags() {
+            for (let i = 0; i < 50; i++) {
+                let flag = document.createElement('div');
+                flag.className = 'rainbow-flag';
+                flag.style.left = Math.random() * window.innerWidth + 'px';
+                flag.style.top = Math.random() * window.innerHeight + 'px';
+                document.body.appendChild(flag);
+
+                // Remove the flag after some time
+                setTimeout(() => {
+                    flag.remove();
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
